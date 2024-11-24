@@ -1,10 +1,10 @@
 resource "aws_security_group" "Jenkins-sg" {
   name        = "Jenkins-Security Group"
-  description = "Open 22,443,80,8080,9000"
+  description = "Open 22,443,80,8080,9000,8081"
 
   # Define a single ingress rule to allow traffic on all specified ports
   ingress = [
-    for port in [22, 80, 443, 8080, 9000, 3000] : {
+    for port in [22, 80, 443, 8080, 9000, 3000,8081] : {
       description      = "TLS from VPC"
       from_port        = port
       to_port          = port
@@ -30,10 +30,11 @@ resource "aws_security_group" "Jenkins-sg" {
 }
 
 
+
 resource "aws_instance" "web" {
   ami                    = "ami-03f4878755434977f"
-  instance_type          = "t2.medium"
-  key_name               = "mumbai"
+  instance_type          = "t2.large"
+  key_name               = "testhp"
   vpc_security_group_ids = [aws_security_group.Jenkins-sg.id]
   user_data              = templatefile("./install_jenkins.sh", {})
 
@@ -42,5 +43,19 @@ resource "aws_instance" "web" {
   }
   root_block_device {
     volume_size = 30
+  }
+}
+resource "aws_instance" "web1" {
+  ami                    = "ami-03f4878755434977f"
+  instance_type          = "t2.medium"
+  key_name               = "testhp"
+  vpc_security_group_ids = [aws_security_group.Jenkins-sg.id]
+  user_data              = templatefile("./install_nexus.sh", {})
+
+  tags = {
+    Name = "nexus"
+  }
+  root_block_device {
+    volume_size = 25
   }
 }
